@@ -1,0 +1,44 @@
+title: Mimikatz Credential Dumping Detection
+id: 12a3b456-78cd-90ef-1234-567890abcdef
+status: stable
+description: Detects potential Mimikatz credential dumping activity through characteristic process execution patterns and command-line arguments
+author: Your Name
+date: 2025/11/02
+references:
+    - https://attack.mitre.org/techniques/T1003/001/
+    - https://github.com/gentilkiwi/mimikatz
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+    - detection.emerging_threats
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        Image|endswith:
+            - '\mimikatz.exe'
+            - '\mimilib.dll'
+    selection_cli:
+        CommandLine|contains:
+            - 'sekurlsa::logonpasswords'
+            - 'sekurlsa::tickets'
+            - 'lsadump::sam'
+            - 'kerberos::golden'
+            - 'privilege::debug'
+            - 'crypto::capi'
+    selection_hashes:
+        Hashes|contains:
+            - 'SHA256=B84C8A1F8F7D0F3E9E8E8C9B0A1B2C3D4E5F6A7B8C9D0E1F2A3B4C5D6E7F8A9B'
+    condition: 1 of selection_*
+falsepositives:
+    - Legitimate security testing with proper authorization
+    - Authorized penetration testing activities
+level: critical
+fields:
+    - ComputerName
+    - User
+    - Image
+    - CommandLine
+    - ParentImage
+    - ParentCommandLine
